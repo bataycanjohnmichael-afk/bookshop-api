@@ -89,6 +89,28 @@ app.post("/login", (req, res) => {
   res.json({ msg: "Logged in" });
 });
 
+// 8. Add or modify a review for a book
+app.post("/reviews/:isbn", (req, res) => {
+  const { rating, comment } = req.body; // rating and optional comment
+  const book = books.find(b => b.isbn === req.params.isbn);
+
+  if (!book) return res.status(404).json({ msg: "Book not found" });
+
+  // Add or update review
+  book.reviews = { rating, comment };
+  res.json({ msg: "Review added/updated", reviews: book.reviews });
+});
+
+// 9. Delete a review for a book
+app.delete("/reviews/:isbn", (req, res) => {
+  const book = books.find(b => b.isbn === req.params.isbn);
+
+  if (!book) return res.status(404).json({ msg: "Book not found" });
+
+  book.reviews = {}; // clear review
+  res.json({ msg: "Review deleted", reviews: book.reviews });
+});
+
 // ------------------------
 // Start server
 // ------------------------
