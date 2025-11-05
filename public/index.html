@@ -56,6 +56,24 @@
     <pre id="reviews"></pre>
   </div>
 
+  <!-- Add/Modify Review -->
+  <div class="section">
+    <h2>Add/Modify Review</h2>
+    <input type="text" id="isbn-add-review" placeholder="ISBN">
+    <input type="number" id="rating" placeholder="Rating (1-5)">
+    <input type="text" id="comment" placeholder="Comment">
+    <button onclick="addOrModifyReview()">Submit Review</button>
+    <pre id="review-msg"></pre>
+  </div>
+
+  <!-- Delete Review -->
+  <div class="section">
+    <h2>Delete Review</h2>
+    <input type="text" id="isbn-delete-review" placeholder="ISBN">
+    <button onclick="deleteReview()">Delete Review</button>
+    <pre id="delete-msg"></pre>
+  </div>
+
   <!-- Register User -->
   <div class="section">
     <h2>Register User</h2>
@@ -75,30 +93,24 @@
   </div>
 
   <script>
-    // <-- Replace this with your live Render URL -->
-    const API_BASE = "https://bookshop-api-2.onrender.com"; // your live Render URL
+    const API_BASE = "https://bookshop-api-oxa0.onrender.com";
 
-    // Load all books
     async function loadBooks() {
-      try {
-        const res = await fetch(`${API_BASE}/books`);
-        const books = await res.json();
-        const container = document.getElementById("booksContainer");
-        container.innerHTML = "";
-        books.forEach(book => {
-          const div = document.createElement("div");
-          div.className = "book";
-          div.innerHTML = `
-            <h2>${book.title}</h2>
-            <p><strong>Author:</strong> ${book.author}</p>
-            <p><strong>ISBN:</strong> ${book.isbn}</p>
-            <p><strong>Reviews:</strong> ${JSON.stringify(book.reviews)}</p>
-          `;
-          container.appendChild(div);
-        });
-      } catch (err) {
-        console.error(err);
-      }
+      const res = await fetch(`${API_BASE}/books`);
+      const books = await res.json();
+      const container = document.getElementById("booksContainer");
+      container.innerHTML = "";
+      books.forEach(book => {
+        const div = document.createElement("div");
+        div.className = "book";
+        div.innerHTML = `
+          <h2>${book.title}</h2>
+          <p><strong>Author:</strong> ${book.author}</p>
+          <p><strong>ISBN:</strong> ${book.isbn}</p>
+          <p><strong>Reviews:</strong> ${JSON.stringify(book.reviews)}</p>
+        `;
+        container.appendChild(div);
+      });
     }
 
     async function getBookByISBN() {
@@ -129,6 +141,29 @@
       document.getElementById("reviews").textContent = JSON.stringify(data, null, 2);
     }
 
+    async function addOrModifyReview() {
+      const isbn = document.getElementById("isbn-add-review").value;
+      const rating = document.getElementById("rating").value;
+      const comment = document.getElementById("comment").value;
+
+      const res = await fetch(`${API_BASE}/reviews/${isbn}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating, comment })
+      });
+      const data = await res.json();
+      document.getElementById("review-msg").textContent = JSON.stringify(data, null, 2);
+      loadBooks();
+    }
+
+    async function deleteReview() {
+      const isbn = document.getElementById("isbn-delete-review").value;
+      const res = await fetch(`${API_BASE}/reviews/${isbn}`, { method: "DELETE" });
+      const data = await res.json();
+      document.getElementById("delete-msg").textContent = JSON.stringify(data, null, 2);
+      loadBooks();
+    }
+
     async function registerUser() {
       const username = document.getElementById("reg-username").value;
       const password = document.getElementById("reg-password").value;
@@ -153,7 +188,6 @@
       document.getElementById("login-msg").textContent = JSON.stringify(data, null, 2);
     }
 
-    // Load books automatically on page load
     window.onload = loadBooks;
   </script>
 </body>
