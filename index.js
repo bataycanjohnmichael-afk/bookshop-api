@@ -3,8 +3,10 @@ import express from "express";
 import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import cors from "cors";
 
-const app = express();
+const app = express(); // <-- create app first
+app.use(cors());      // <-- now you can use it
 app.use(bodyParser.json());
 
 // Setup __dirname for ES Modules
