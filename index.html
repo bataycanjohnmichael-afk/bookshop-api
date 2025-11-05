@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookshop API Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    input, button { margin: 5px; padding: 5px; }
+    .section { margin-bottom: 20px; }
+    .book { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .book h3 { margin: 0 0 5px; }
+    .book p { margin: 2px 0; }
+    pre { background: #f4f4f4; padding: 10px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+<h1>Welcome to my BOOKSHOP!</h1>
+
+<!-- Get All Books -->
+<div class="section">
+  <h2>All Books</h2>
+  <button onclick="getAllBooks()">Get All Books</button>
+  <div id="all-books"></div>
+</div>
+
+<!-- Get Book by ISBN -->
+<div class="section">
+  <h2>Get Book by ISBN</h2>
+  <input type="text" id="isbn" placeholder="Enter ISBN">
+  <button onclick="getBookByISBN()">Get Book</button>
+  <div id="book-isbn"></div>
+</div>
+
+<!-- Get Books by Author -->
+<div class="section">
+  <h2>Get Books by Author</h2>
+  <input type="text" id="author" placeholder="Enter author">
+  <button onclick="getBooksByAuthor()">Get Books</button>
+  <div id="books-author"></div>
+</div>
+
+<!-- Get Books by Title -->
+<div class="section">
+  <h2>Get Books by Title</h2>
+  <input type="text" id="title" placeholder="Enter title">
+  <button onclick="getBooksByTitle()">Get Books</button>
+  <div id="books-title"></div>
+</div>
+
+<!-- Get Reviews by ISBN -->
+<div class="section">
+  <h2>Get Reviews by ISBN</h2>
+  <input type="text" id="isbn-review" placeholder="Enter ISBN">
+  <button onclick="getReviews()">Get Reviews</button>
+  <pre id="reviews"></pre>
+</div>
+
+<!-- Register User -->
+<div class="section">
+  <h2>Register User</h2>
+  <input type="text" id="reg-username" placeholder="Username">
+  <input type="password" id="reg-password" placeholder="Password">
+  <button onclick="registerUser()">Register</button>
+  <pre id="register-msg"></pre>
+</div>
+
+<!-- Login User -->
+<div class="section">
+  <h2>Login</h2>
+  <input type="text" id="login-username" placeholder="Username">
+  <input type="password" id="login-password" placeholder="Password">
+  <button onclick="loginUser()">Login</button>
+  <pre id="login-msg"></pre>
+</div>
+
+<script>
+const API_BASE = "http://localhost:3000";
+
+// Helper to display books in a container
+function displayBooks(containerId, books) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  if (!books || books.length === 0) {
+    container.textContent = "No books found.";
+    return;
+  }
+  books.forEach(book => {
+    const div = document.createElement("div");
+    div.className = "book";
+    div.innerHTML = `
+      <h3>${book.title}</h3>
+      <p><strong>Author:</strong> ${book.author}</p>
+      <p><strong>ISBN:</strong> ${book.isbn}</p>
+      <p><strong>Reviews:</strong> ${JSON.stringify(book.reviews)}</p>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function getAllBooks() {
+  const res = await fetch(`${API_BASE}/books`);
+  const data = await res.json();
+  displayBooks("all-books", data);
+}
+
+async function getBookByISBN() {
+  const isbn = document.getElementById("isbn").value;
+  const res = await fetch(`${API_BASE}/books/${isbn}`);
+  const data = await res.json();
+  displayBooks("book-isbn", Array.isArray(data) ? data : [data]);
+}
+
+async function getBooksByAuthor() {
+  const author = document.getElementById("author").value;
+  const res = await fetch(`${API_BASE}/author/${author}`);
+  const data = await res.json();
+  displayBooks("books-author", data);
+}
+
+async function getBooksByTitle() {
+  const title = document.getElementById("title").value;
+  const res = await fetch(`${API_BASE}/title/${title}`);
+  const data = await res.json();
+  displayBooks("books-title", data);
+}
+
+async function getReviews() {
+  const isbn = document.getElementById("isbn-review").value;
+  const res = await fetch(`${API_BASE}/reviews/${isbn}`);
+  const data = await res.json();
+  document.getElementById("reviews").textContent = JSON.stringify(data, null, 2);
+}
+
+async function registerUser() {
+  const username = document.getElementById("reg-username").value;
+  const password = document.getElementById("reg-password").value;
+  const res = await fetch(`${API_BASE}/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
+  document.getElementById("register-msg").textContent = JSON.stringify(data, null, 2);
+}
+
+async function loginUser() {
+  const username = document.getElementById("login-username").value;
+  const password = document.getElementById("login-password").value;
+  const res = await fetch(`${API_BASE}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
+  document.getElementById("login-msg").textContent = JSON.stringify(data, null, 2);
+}
+
+// Load random sample books on page load
+window.onload = getAllBooks;
+
+</script>
+</body>
+</html>
